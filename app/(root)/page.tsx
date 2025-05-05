@@ -9,14 +9,21 @@ import React from 'react'
 const page = async () => {
   const user = await getCurrentUser()
 
-  const [userInterviews, latestInterviews] = await Promise.all([
-    await getInterviewsByUserId(user?.id!),
-    await getLatestInterviews({ userId: user?.id! })
+  if (!user) {
+    return (
+      <div>
+        <p>You are not logged in.</p>
+      </div>
+    )
+  }
 
+  const [userInterviews, latestInterviews] = await Promise.all([
+    getInterviewsByUserId(user.id),
+    getLatestInterviews({ userId: user.id })
   ]);
 
-  const hasPastInterviews = userInterviews?.length! > 0;
-  const hasUpcomingInterviews = latestInterviews?.length! > 0;
+  const hasPastInterviews = (userInterviews || []).length > 0;
+  const hasUpcomingInterviews = (latestInterviews || []).length > 0;
 
   return (
     <>
@@ -37,7 +44,7 @@ const page = async () => {
         <div className="interviews-section">
           {
             hasPastInterviews ? (
-              userInterviews?.map((interview) => (
+              (userInterviews || []).map((interview) => (
                 <InterviewCard {...interview} key={interview.id} />
               ))
             ) : (<p>You haven&apos;t taken any interviews yet</p>)
@@ -50,7 +57,7 @@ const page = async () => {
         <div className='interviews-section'>
           {
             hasUpcomingInterviews ? (
-              latestInterviews?.map((interview) => (
+              (latestInterviews || []).map((interview) => (
                 <InterviewCard {...interview} key={interview.id} />
               ))
             ) : (<p>There are no new interviews available</p>)
